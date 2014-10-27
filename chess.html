@@ -1,0 +1,143 @@
+<html>
+<head>
+<title>Chess</title>
+<script src="Chess.js"></script>
+<script>
+var generateMove = PS.Chess_ComputerPlayer.generateMove
+var showGame = PS.Chess_Game.showGame
+var gameBoard = PS.Chess_Game.gameBoard
+var gameColor = PS.Chess_Game.gameColor
+var makeMove = PS.Chess_Game.makeMove
+var Nothing = PS.Data_Maybe.Nothing
+var Just = PS.Data_Maybe.Just
+var White = PS.Chess_Color.White
+var Black = PS.Chess_Color.Black
+var RegularMove = PS.Chess_Move.RegularMove
+var Field = PS.Chess_Field.Field
+var updateGame = PS.Chess_Game.updateGame
+var showField = PS.Chess_Field.showField
+var getFigureUnicode = PS.Chess_Board.getFigureUnicode
+
+var game = PS.Chess_Game.GameStart.value
+var selectedField = undefined
+
+function fieldClicked(c,r) {
+  if (selectedField === undefined && gameColor(game) instanceof White) {
+    selectedField = { col: c, row: r }
+    var cell = document.getElementById(showField(new Field(c,r)))
+    cell.classList.add("selected")
+  } else if (selectedField !== undefined && gameColor(game) instanceof White) {
+    var oldField = new Field(selectedField.col, selectedField.row)
+    var oldCell = document.getElementById(showField(oldField))
+    selectedField = undefined
+    oldCell.classList.remove("selected")
+    var gameAfterWhiteMove = makeMove(oldField)(new Field(c,r))(Nothing.value)(game)
+    if (gameAfterWhiteMove instanceof Just) {
+      game = gameAfterWhiteMove.value0
+      updateBoard()
+      setTimeout(makeComputerMove,0)
+    }
+  }
+}
+
+function makeComputerMove() {
+  var gameAfterBlackMove = generateMove(game)
+  if (gameAfterBlackMove instanceof Just) {
+    game = gameAfterBlackMove.value0
+    updateBoard()
+  }
+}
+
+function updateBoard() {
+  for (var r = 1; r < 9; r++) {
+    for (var c = 1; c < 9; c++) {
+      var cell = document.getElementById(showField(new Field(c,r)))
+      cell.innerHTML = getFigureUnicode(gameBoard(game))(new Field(c,r))
+    }
+  }
+
+}
+
+</script>
+<style>
+body {
+  font-family: Verdana;
+}
+table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.rowLabel {
+  text-align: center;
+  width: 25px;
+  height: 50px;
+}
+.columnLabel {
+  text-align: center;
+  width: 50px;
+  height: 25px;
+}
+.boardCell {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  font-size: 36px;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  border: solid 3px transparent;
+}
+.boardCell.selected {
+  border: solid 3px blue !important;
+}
+.boardCell.black {
+  background-color: red;
+}
+.boardCell.white {
+  background-color: yellow;
+}
+</style>
+</head>
+<body>
+  <table>
+    <tr>
+      <td>&nbsp;</td>
+      <td class='columnLabel'>a</td>
+      <td class='columnLabel'>b</td>
+      <td class='columnLabel'>c</td>
+      <td class='columnLabel'>d</td>
+      <td class='columnLabel'>e</td>
+      <td class='columnLabel'>f</td>
+      <td class='columnLabel'>g</td>
+      <td class='columnLabel'>h</td>
+      <td>&nbsp;</td>
+    </tr>
+    <script>
+      for (var r = 8; r > 0; r--) {
+        document.write("<tr><td class='rowLabel'>"+r+"</td>");
+        for (var c = 1; c < 9; c++) {
+          var colorClass = (c+r) % 2 == 0 ? "black" : "white";
+          document.write("<td class='boardCell "+
+                            colorClass+
+                            "' onclick='fieldClicked("+c+","+r+")' id='"+showField(new Field(c,r))+"'></td>");
+        }
+        document.write("<td class='rowLabel'>"+r+"</td></tr>");
+      }
+      updateBoard()
+    </script>
+    <tr>
+      <td>&nbsp;</td>
+      <td class='columnLabel'>a</td>
+      <td class='columnLabel'>b</td>
+      <td class='columnLabel'>c</td>
+      <td class='columnLabel'>d</td>
+      <td class='columnLabel'>e</td>
+      <td class='columnLabel'>f</td>
+      <td class='columnLabel'>g</td>
+      <td class='columnLabel'>h</td>
+      <td>&nbsp;</td>
+    </tr>
+</table>
+</body>
+</html>
+
